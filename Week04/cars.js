@@ -1,51 +1,52 @@
 const fs = require("fs")
-var data=fs.readFileSync('cars.json')
-var carDetails=JSON.parse(data);
-console.log(carDetails);
-
-
 const util = require('util')
-//const url=loadJSON('carList.json')
-//console.log(url)
 
 const writeFile = util.promisify(fs.writeFile)
 const readFile = util.promisify(fs.readFile)
+//For Asynchronous behavior, we use promisify
 
- class Car {
-
-constructor(car){
-this.color=color
-this.model=model
-this.brand=brand
-
+class Car {
+    constructor(obj) {
+        this.color = obj.color
+        this.model = obj.model
+        this.brand = obj.brand 
+    }
 } 
+    
+// const carObj={
+//     color: "green",
+//     model: "3 Sereies",
+//     brand: "BMW"
+// }
+// const new_car = Car(carObj)
 
-} 
-
-class CarsList {
-    constructor(File) {
+class Cars {
+    constructor(fileName) {
         this.cars = []
-        this.File=File
-
+        this.fileName = fileName
         this.load()
     }
-    load(){
-           
-            this.cars = []
-              readFile(this.File, 'utf8')
-                 .then(data => JSON.parse(data))
-                .then(carsList => {
-                    carsList.forEach(car => {
-                        // this.cars.push(car)
-                        this.add(car)
-                    })
-                    //console.log('after', this.cars)
+//to load the file and then push it to list of cars by using Json.parse
+    load() {
+    
+        this.cars = []
+        //readFile(this.fileName).then(function(data){console.log(data)})
+        readFile(this.fileName, 'utf8')
+            //.then(data => console.log(typeof data))
+            .then(data => JSON.parse(data))
+            .then(carsList => {
+                //console.log('before', this.cars)
+                carsList.forEach(car => {
+                    // this.cars.push(car)
+                    this.add(car)
                 })
-    
-        }
-    
-        save(){
-            writeFile(this.File, JSON.stringify(this.cars))
+                //console.log('after', this.cars)
+            })
+
+    }
+
+    save(){
+        writeFile(this.fileName, JSON.stringify(this.cars))
     }
 
     getAll() {
@@ -53,18 +54,23 @@ class CarsList {
     }
 
     getById(id) {
-        if (!this.cars[id]) throw Error(`Cannot find a car with ${id}`)
-        return this.cars[id];
+        if (!this.cars[id - 1]) throw Error(`Cannot find a car with ${id}`)
+
+        return this.cars[id - 1];
     }
 
     add(car) {
+        if (!car instanceof(Car))
+            throw new Error('car is not instance of Car class')
         this.cars.push(car);
         return this.cars;
     }
 
     edit(id, car_partial) {
         if (!this.cars[id]) throw Error(`Cannot find a car with ${id}`)
-        this.cars[id] = { ...this.cars[id], ...car_partial }
+        this.cars[id] = { ...this.cars[id],
+            ...car_partial
+        }
         return this.cars;
     }
 
@@ -76,4 +82,4 @@ class CarsList {
 
 }
 
-module.exports = CarsList,Car;
+module.exports = Cars;
